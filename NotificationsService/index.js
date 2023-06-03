@@ -8,17 +8,6 @@ var { MongoClient } = require('mongodb');
 
 
 app.get('/api/users', (req, res) => {
-  // Logic to fetch users from a database or any other source
-  const users = [
-    { id: 1, name: 'John Doe' },
-    { id: 2, name: 'Jane Smith' },
-  ];
-  // public int Id { get; set; }
-  // public string Name { get; set; }
-  // public string Email { get; set; }
-  // public DateTime BirthDate { get; set; }
-  // public string Address { get; set; }
-
   let user = {
     id: 1,
     name: "Mina",
@@ -44,59 +33,6 @@ const EventType = {
 var mongoUri = "mongodb://localhost:27017/";
 var usersCollection = new MongoClient(mongoUri)
   .db("notificationservicedb").collection("users");
-
-
-// amqpCB.connect('amqp://45.63.116.153:5672', function (error, connection) {
-//   if (error)
-//     throw error;
-
-//   connection.createChannel(function (error1, channel) {
-//     if (error1)
-//       throw error1;
-
-//     var exchange = "MinaEX";
-
-//     channel.assertExchange(exchange, 'fanout');
-//     channel.assertQueue('MinaEX.Task2Demo', null, function (error2, q) {
-//       if (error2)
-//         throw error2;
-
-//       channel.bindQueue(q.queue, exchange);
-
-//       console.log("Waiting for messages in MinaEX.Task2Demo queue");
-
-//       channel.consume(q.queue, function (msg) {
-//         var userEvent = JSON.parse(msg.content.toString());
-//         console.log("===============================");
-//         console.log("Received message");
-//         console.log(userEvent);
-//         console.log("===============================");
-//         channel.ack(msg);
-//       });
-//     });
-
-//   });
-
-//   function processUserEvent(userEvent) {
-//     console.log("Processing User Event")
-//     console.log(userEvent);
-
-//     var userData = {
-//       _id: userEvent.userData.id,
-//       name: userEvent.userData.name,
-//       email: userEvent.userData.email,
-//     };
-
-//     if (userEvent.type == EventType.Created)
-//       usersCollection.insertOne(userData);
-//     if (userEvent.type == EventType.Updated)
-//       usersCollection.updateOne({ '_id': userData._id }, { $set: userData });
-//     if (userEvent.type == EventType.Deleted)
-//       usersCollection.deleteOne({ '_id': userData._id });
-//   }
-
-// });
-
 
 
 async function sendMessage(user) {
