@@ -30,11 +30,6 @@ const EventType = {
   Deleted: 2
 };
 
-var mongoUri = "mongodb://localhost:27017/";
-var usersCollection = new MongoClient(mongoUri)
-  .db("notificationservicedb").collection("users");
-
-
 async function sendMessage(user) {
   try {
     // Create a connection to RabbitMQ
