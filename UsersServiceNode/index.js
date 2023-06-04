@@ -1,23 +1,49 @@
 const express = require('express');
 const app = express();
 const port = 3000;
-var amqpCB = require("amqplib/callback_api");
-var amqp = require("amqplib");
-var { MongoClient } = require('mongodb');
+let amqpCB = require("amqplib/callback_api");
+let amqp = require("amqplib");
+let { MongoClient } = require('mongodb');
+//const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
+
+let mongoUri = "mongodb://localhost:27017/";
+let userEventsCollection = new MongoClient(mongoUri)
+    .db("EDA").collection("userEventsCollection");
 
 
+let list = [];
+let eventType = {};
+eventType["Created"] = 0;
+eventType["Updated"] = 1;
+eventType["Deleted"] = 2;
 
-app.get('/api/users', (req, res) => {
-  let user = {
-    id: 1,
-    name: "Mina",
-    email: "mina@gmail.com",
-    birthDate: (new Date(2000, 1, 1)).toISOString(),
-    address: "string"
+let user = {
+  id: 1,
+  name: "Mina",
+  email: "mina@gmail.com",
+  birthDate: (new Date(2000, 1, 1)).toISOString(),
+  address: "string"
+}
+
+
+ReprocessUserEvents()
+
+
+class UserEvent {
+  constructor(id, type) {
+
+    this.Id = id;
+    this.Type = type;
+    this.CreatedAt = new Date().toISOString();
+    this.UserData = user;
   }
+}
 
-  sendMessage(user);
-  res.json(users);
+app.get('/api/users', async (req, res) => {
+  let userEvent= new UserEvent(uuidv4(), eventType["Created"])
+  await SaveAndProcessEvents(userEvent);
+  res.json(userEvent);
 });
 
 app.listen(port, () => {
@@ -66,4 +92,45 @@ async function sendMessage(user) {
   }
 }
 
+async function SaveAndProcessEvents(userEvent)
+{
+  await userEventsCollection.insertOne(userEvent);
+  ProcessUserEvent(userEvent);
+  await sendMessage(userEvent);
+}
+
+function ProcessUserEvent(userEvent)
+{
+  switch (userEvent.Type) {
+    case EventType.Created:
+      list.push(userEvent.UserData);
+      break;
+    case EventType.Updated:
+      let oldUser = list.find(u => u.Id === userEvent.UserData.Id)[0];
+      oldUser.Name = userEvent.UserData.Name;
+      oldUser.Email = userEvent.UserData.Email;
+      oldUser.BirthDate = userEvent.UserData.BirthDate;
+      oldUser.Address = userEvent.UserData.Address;
+      break;
+    case EventType.Deleted:
+      list = list.filter(u => u.Id !== userEvent.UserData.Id);
+      break;
+  }
+}
+
+function ReprocessUserEvents()
+{
+  //.Find(_ => true).SortBy(e => e.CreatedAt);
+
+  userEventsCollection.find({}).sort('CreatedAt').toArray().then(
+      eventsList => {
+        for (let userEvent of eventsList) {
+          ProcessUserEvent(userEvent);
+        }
+      }
+  );
+  list = [];
+
+
+}
 

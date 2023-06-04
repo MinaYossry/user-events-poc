@@ -34,7 +34,7 @@ namespace UsersService.RabbitMq
                 consumer.Received += (sender, ea) =>
                 {
                     var message = System.Text.Encoding.UTF8.GetString(ea.Body.ToArray());
-                    var user = JsonSerializer.Deserialize<User>(message, new JsonSerializerOptions
+                    var user = JsonSerializer.Deserialize<UserEvent>(message, new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     });
